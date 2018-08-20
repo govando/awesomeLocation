@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,7 +21,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 /** Se solicita acceso a ACCESS_FINE_LOCATION **/
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends FragmentActivity implements
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
@@ -45,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mRequestUpdatesButton = (Button) findViewById(R.id.button_activate);
-        mRemoveUpdatesButton = (Button) findViewById(R.id.button_deactivate);
+        mRequestUpdatesButton = (Button) findViewById(R.id.mRequestUpdatesButton);
+        mRemoveUpdatesButton = (Button) findViewById(R.id.mRemoveUpdatesButton);
         mOnOff = (TextView) findViewById(R.id.textView_onOff);
 
         // Check if the user revoked runtime permissions.
@@ -72,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateButtonsState(Utils.getRequestingLocationUpdates(this));
-        mLocationUpdatesResultView.setText(Utils.getLocationUpdatesResult(this));
+        //mLocationUpdatesResultView.setText(Utils.getLocationUpdatesResult(this));
     }
 
     @Override
@@ -147,7 +149,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         if (s.equals(Utils.KEY_LOCATION_UPDATES_RESULT)) {
-            mLocationUpdatesResultView.setText(Utils.getLocationUpdatesResult(this));
+            // TODO aqui cambia el texto de Localización de la actividad
+            //mLocationUpdatesResultView.setText(Utils.getLocationUpdatesResult(this));
         } else if (s.equals(Utils.KEY_LOCATION_UPDATES_REQUESTED)) {
             updateButtonsState(Utils.getRequestingLocationUpdates(this));
         }
@@ -165,4 +168,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /** Mantiene un solo botón disponible
+     */
+    private void updateButtonsState(boolean requestingLocationUpdates) {
+        if (requestingLocationUpdates) {
+            mRequestUpdatesButton.setEnabled(false);
+            mRemoveUpdatesButton.setEnabled(true);
+        } else {
+            mRequestUpdatesButton.setEnabled(true);
+            mRemoveUpdatesButton.setEnabled(false);
+        }
+    }
 }

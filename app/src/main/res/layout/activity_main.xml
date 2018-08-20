@@ -22,29 +22,29 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button_activate"
+        android:id="@+id/mRequestUpdatesButton"
         android:layout_width="86dp"
         android:layout_height="48dp"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="Activar"
-        app:layout_constraintEnd_toStartOf="@+id/button_deactivate"
+        app:layout_constraintEnd_toStartOf="@+id/mRemoveUpdatesButton"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textTitulo" />
 
     <Button
-        android:id="@+id/button_deactivate"
-        android:layout_width="107dp"
-        android:layout_height="50dp"
+        android:id="@+id/mRemoveUpdatesButton"
+        android:layout_width="117dp"
+        android:layout_height="51dp"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="Desactivar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/button_activate"
+        app:layout_constraintStart_toEndOf="@+id/mRequestUpdatesButton"
         app:layout_constraintTop_toBottomOf="@+id/textTitulo" />
 
     <TextView
@@ -59,5 +59,5 @@
         android:text="Activado"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_activate" />
+        app:layout_constraintTop_toBottomOf="@+id/mRequestUpdatesButton" />
 </android.support.constraint.ConstraintLayout>
