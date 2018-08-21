@@ -5,11 +5,13 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -33,13 +35,14 @@ public class MainActivity extends FragmentActivity implements
 
     /** Parametros del Request para la API de localización **/
     private LocationRequest mLocationRequest;
+
     /** Acceso a la API de localización */
     private FusedLocationProviderClient mFusedLocationClient;
 
     // Acceso a elementos del Layout.
     private Button mRequestUpdatesButton;
     private Button mRemoveUpdatesButton;
-    private TextView mOnOff;
+    //private TextView mOnOff;
 
 
     @Override
@@ -47,9 +50,9 @@ public class MainActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mRequestUpdatesButton = (Button) findViewById(R.id.mRequestUpdatesButton);
-        mRemoveUpdatesButton = (Button) findViewById(R.id.mRemoveUpdatesButton);
-        mOnOff = (TextView) findViewById(R.id.textView_onOff);
+        mRequestUpdatesButton =  findViewById(R.id.mRequestUpdatesButton);
+        mRemoveUpdatesButton =  findViewById(R.id.mRemoveUpdatesButton);
+        //mOnOff = (TextView) findViewById(R.id.textView_onOff);
 
         // Check if the user revoked runtime permissions.
         if (!checkPermissions()) {
@@ -59,7 +62,7 @@ public class MainActivity extends FragmentActivity implements
         //Acceso a la API que provee localización (Fused Location Provider)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-
+        Log.i("activityMain", "Chupalooooo");
         createLocationRequest();
     }
 
@@ -126,13 +129,15 @@ public class MainActivity extends FragmentActivity implements
 
     /** Genera la estructura de los Requests **/
     private void createLocationRequest() {
+        Log.i("activityMain", "Creando Location Request");
         mLocationRequest = new LocationRequest();
 
         mLocationRequest.setInterval(UPDATE_INTERVAL);
         mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setMaxWaitTime(MAX_WAIT_TIME);
 
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
     }
 
     private PendingIntent getPendingIntent() {
@@ -144,6 +149,56 @@ public class MainActivity extends FragmentActivity implements
         Intent intent = new Intent(this, LocationUpdatesBroadcastReceiver.class);
         intent.setAction(LocationUpdatesBroadcastReceiver.ACTION_PROCESS_UPDATES);
         return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    /**
+     * Callback received when a permissions request has been completed.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        Log.i(TAG, "onRequestPermissionResult");
+        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.length <= 0) {
+                // If user interaction was interrupted, the permission request is cancelled and you
+                // receive empty arrays.
+                Log.i(TAG, "User interaction was cancelled.");
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission was granted.
+                requestLocationUpdates(null);
+            } else {
+                // Permission denied.
+
+                // Notify the user via a SnackBar that they have rejected a core permission for the
+                // app, which makes the Activity useless. In a real app, core permissions would
+                // typically be best requested during a welcome-screen flow.
+
+                // Additionally, it is important to remember that a permission might have been
+                // rejected without asking the user for permission (device policy or "Never ask
+                // again" prompts). Therefore, a user interface affordance is typically implemented
+                // when permissions are denied. Otherwise, your app could appear unresponsive to
+                // touches or interactions which have required permissions.
+                Snackbar.make(
+                        findViewById(R.id.activity_main),
+                        R.string.permission_denied_explanation,
+                        Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.settings, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                // Build intent that displays the App settings screen.
+                                Intent intent = new Intent();
+                                intent.setAction(
+                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package",
+                                        BuildConfig.APPLICATION_ID, null);
+                                intent.setData(uri);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            }
+                        })
+                        .show();
+            }
+        }
     }
 
     @Override
