@@ -22,19 +22,21 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-/** Se solicita acceso a ACCESS_FINE_LOCATION **/
+  /** Se solicita acceso a ACCESS_FINE_LOCATION
+   *  El usuario activa traza presionando el botón activar
+   *
+  */
 public class MainActivity extends FragmentActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
 
+    /** Parametros del Request para la API de localización **/
+    private LocationRequest mLocationRequest;
     private static final long UPDATE_INTERVAL = 5000; // Cada 5 segundos.
     private static final long FASTEST_UPDATE_INTERVAL = 5000; // Cada 3 segundos.
     private static final long MAX_WAIT_TIME = UPDATE_INTERVAL*2 ; // Cada 10 segundos.
-
-    /** Parametros del Request para la API de localización **/
-    private LocationRequest mLocationRequest;
 
     /** Acceso a la API de localización */
     private FusedLocationProviderClient mFusedLocationClient;
@@ -43,7 +45,6 @@ public class MainActivity extends FragmentActivity implements
     private Button mRequestUpdatesButton;
     private Button mRemoveUpdatesButton;
     //private TextView mOnOff;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +59,7 @@ public class MainActivity extends FragmentActivity implements
         if (!checkPermissions()) {
             requestPermissions();
         }
-
+        checkUserID();
         //Acceso a la API que provee localización (Fused Location Provider)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -127,29 +128,16 @@ public class MainActivity extends FragmentActivity implements
     }
 
 
-    /** Genera la estructura de los Requests **/
+    /** Genera la estructura del Request **/
     private void createLocationRequest() {
         Log.i("activityMain", "Creando Location Request");
         mLocationRequest = new LocationRequest();
-
         mLocationRequest.setInterval(UPDATE_INTERVAL);
         mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setMaxWaitTime(MAX_WAIT_TIME);
-
-
     }
 
-    private PendingIntent getPendingIntent() {
-        // TODO(developer): uncomment to use PendingIntent.getService().
-//        Intent intent = new Intent(this, LocationUpdatesIntentService.class);
-//        intent.setAction(LocationUpdatesIntentService.ACTION_PROCESS_UPDATES);
-//        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Intent intent = new Intent(this, LocationUpdatesBroadcastReceiver.class);
-        intent.setAction(LocationUpdatesBroadcastReceiver.ACTION_PROCESS_UPDATES);
-        return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-    }
 
     /**
      * Callback received when a permissions request has been completed.
@@ -216,15 +204,20 @@ public class MainActivity extends FragmentActivity implements
         try {
             Log.i(TAG, "Starting location updates");
             Utils.setRequestingLocationUpdates(this, true);
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, getPendingIntent());
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest, getPendingIntent()); //clases: LocationRequest, PendingIntent
         } catch (SecurityException e) {
             Utils.setRequestingLocationUpdates(this, false);
             e.printStackTrace();
         }
     }
 
-    /** Mantiene un solo botón disponible
-     */
+      private PendingIntent getPendingIntent() {
+          Intent intent = new Intent(this, LocationUpdatesBroadcastReceiver.class);
+          intent.setAction(LocationUpdatesBroadcastReceiver.ACTION_PROCESS_UPDATES);
+          return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+      }
+
+    /** Mantiene un solo botón disponible */
     private void updateButtonsState(boolean requestingLocationUpdates) {
         if (requestingLocationUpdates) {
             mRequestUpdatesButton.setEnabled(false);

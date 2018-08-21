@@ -19,22 +19,40 @@ import java.util.List;
 
 public class Utils {
 
+    /** *
+     *  Las KEY son usadas para almacenar datos (persistentes) en SharedPreferences
+     *  SharedPreferences permite almacenar datos usando <key,value>
+     */
     final static String KEY_LOCATION_UPDATES_REQUESTED = "location-updates-requested";
     final static String KEY_LOCATION_UPDATES_RESULT = "location-update-result";
     final static String CHANNEL_ID = "channel_01";
 
-    static void setRequestingLocationUpdates(Context context, boolean value) {
+    static void sendLocations(List<Location> locations) {
+        if (locations.isEmpty()) {
+            // TODO avisar con un 'Toast' (mensaje flotante)  que no existe localización
+        }
+        //La respuesta al LocationRequest pueden ser varias localizaciones
+        StringBuilder sb = new StringBuilder();
+        for (Location location : locations) {
+            sb.append("(");
+            sb.append(location.getLatitude());
+            sb.append(", ");
+            sb.append(location.getLongitude());
+            sb.append(")");
+            sb.append("\n");
+        }
+
+
+        return sb.toString();
+
+        /*
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
-                .putBoolean(KEY_LOCATION_UPDATES_REQUESTED, value)
+                .putString(KEY_LOCATION_UPDATES_RESULT, getLocationResultTitle(context, locations)
+                        + "\n" + getLocationResultText(context, locations))
                 .apply();
+        */
     }
-
-    static boolean getRequestingLocationUpdates(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean(KEY_LOCATION_UPDATES_REQUESTED, false);
-    }
-
 
     /**
      * Posts a notification in the notification bar when a transition is detected.
@@ -99,6 +117,19 @@ public class Utils {
     }
 
 
+    static void setRequestingLocationUpdates(Context context, boolean value) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(KEY_LOCATION_UPDATES_REQUESTED, value)
+                .apply();
+    }
+
+    static boolean getRequestingLocationUpdates(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(KEY_LOCATION_UPDATES_REQUESTED, false);
+    }
+
+
     /**
      * Returns the title for reporting about a list of {@link Location} objects.
      *
@@ -139,6 +170,8 @@ public class Utils {
                 .apply();
     }
 
+
+    /** Retorna la/s  última/s localización/es */
     static String getLocationUpdatesResult(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(KEY_LOCATION_UPDATES_RESULT, "");

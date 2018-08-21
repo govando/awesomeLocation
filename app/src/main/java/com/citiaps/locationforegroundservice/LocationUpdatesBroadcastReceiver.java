@@ -24,13 +24,20 @@ public class LocationUpdatesBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
+            Log.i(TAG, "---> Intent.getAction: "+action);
             if (ACTION_PROCESS_UPDATES.equals(action)) {
                 LocationResult result = LocationResult.extractResult(intent);
                 if (result != null) {
                     List<Location> locations = result.getLocations();
-                    Utils.setLocationUpdatesResult(context, locations);
-                    Utils.sendNotification(context, Utils.getLocationResultTitle(context, locations));
-                    Log.i(TAG, Utils.getLocationUpdatesResult(context));
+                    Utils.sendNotification(locations);
+                    /** Almacena las localizaciones en SharedPreferences, luego las lee
+                     * a través de la key ACTION_PROCESS_UPDATES
+                     *
+                     Utils.setLocationUpdatesResult(context, locations);
+                     /**  Puedo dejar una Notificación sobre la ejecución de la aplicación -> última ubicación
+                     Utils.sendNotification(context, Utils.getLocationResultTitle(context, locations));
+                     Log.i(TAG, Utils.getLocationUpdatesResult(context));
+                     /** **/
                 }
             }
         }
