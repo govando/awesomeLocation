@@ -12,10 +12,15 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 public class Utils {
 
@@ -25,25 +30,33 @@ public class Utils {
      */
     final static String KEY_LOCATION_UPDATES_REQUESTED = "location-updates-requested";
     final static String KEY_LOCATION_UPDATES_RESULT = "location-update-result";
-    final static String CHANNEL_ID = "channel_01";
+    final static String KEY_CHECK_USERID = "user_id";
+
+    /** userID único por Dispositivo **/
+    private static String userID = "null";
+    private static String TAG = "Utils";
+    final static String CHANNEL_ID = "channel_01"; //variable para notificaciones
+    private static Random generator = new Random();
 
     static void sendLocations(List<Location> locations) {
+        JSONObject stepLoc=null;
         if (locations.isEmpty()) {
             // TODO avisar con un 'Toast' (mensaje flotante)  que no existe localización
         }
         //La respuesta al LocationRequest pueden ser varias localizaciones
-        StringBuilder sb = new StringBuilder();
         for (Location location : locations) {
-            sb.append("(");
-            sb.append(location.getLatitude());
-            sb.append(", ");
-            sb.append(location.getLongitude());
-            sb.append(")");
-            sb.append("\n");
+            stepLoc = generateJSONstep(userID, Double.toString(location.getLatitude()),
+                    Double.toString(location.getLongitude()),
+                    Long.toString(location.getTime()), Float.toString(location.getAccuracy()),
+                    Double.toString(location.getAltitude()), Float.toString(location.getSpeed()));
+            /** -- Envio directo al web service --**/
+            /** TODO if(online)
+             *  TODO REVISAR EN http://hmkcode.com/android-send-json-data-to-server/
+             */
+            new SendDeviceDetails.execute("http://localhost:8123/addLoc", stepLoc.toString());
+            // TODO if(offline) Almacenar en sharedpreference carepalo
         }
 
-
-        return sb.toString();
 
         /*
         PreferenceManager.getDefaultSharedPreferences(context)
@@ -176,4 +189,51 @@ public class Utils {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(KEY_LOCATION_UPDATES_RESULT, "");
     }
+
+    /** Utils */
+    static int randomGenerator() {
+        return generator.nextInt(Integer.MAX_VALUE);
+    }
+
+    /** JSON Utils**/
+    static JSONObject generateJSONstep(String userID, String lat, String lon, String timestamp,
+                                       String accuracy, String altitude, String speed) {
+        JSONObject stepJSON = new JSONObject();
+        try {
+            // TODO stepJSON.put("index", "1");
+            stepJSON.put("userID", userID);
+            stepJSON.put("lat", lat);
+            stepJSON.put("lon", lon);
+            stepJSON.put("timestamp", timestamp);
+            stepJSON.put("accuracy", accuracy);
+            stepJSON.put("altitude", altitude);
+            stepJSON.put("speed", speed);
+
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Log.i(TAG, "---- Utils: No se pudo generar el JSON");
+        }
+        return stepJSON;
+    }
+
+    /** Creo un userID o lo cargo si ya existe  */
+    static void checkUserID(Context context){
+        userID = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(Utils.KEY_CHECK_USERID, "null");
+        //crear un ID random*+timestamp *por defecto java.util.random usa nanoSystemTime
+        if(userID.equals("null")){
+            StringBuilder id = new StringBuilder();
+            id.append(Utils.randomGenerator());
+            id.append(System.currentTimeMillis());
+            userID = id.toString();
+            PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit()
+                    .putString(Utils.KEY_CHECK_USERID, userID)
+                    .apply();
+            Log.i("TAG","--- MainActiviti: Se genero el id:"+userID);
+        }
+        Log.i("TAG","--- MainActiviti: Se usará el id:"+userID);
+    }
+
 }

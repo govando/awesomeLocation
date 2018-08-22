@@ -29,7 +29,7 @@ public class LocationUpdatesBroadcastReceiver extends BroadcastReceiver {
                 LocationResult result = LocationResult.extractResult(intent);
                 if (result != null) {
                     List<Location> locations = result.getLocations();
-                    Utils.sendNotification(locations);
+                    Utils.sendLocations(locations);
                     /** Almacena las localizaciones en SharedPreferences, luego las lee
                      * a través de la key ACTION_PROCESS_UPDATES
                      *

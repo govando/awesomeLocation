@@ -22,7 +22,8 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-  /** Se solicita acceso a ACCESS_FINE_LOCATION
+
+/** Se solicita acceso a ACCESS_FINE_LOCATION
    *  El usuario activa traza presionando el botón activar
    *
   */
@@ -31,7 +32,6 @@ public class MainActivity extends FragmentActivity implements
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
-
     /** Parametros del Request para la API de localización **/
     private LocationRequest mLocationRequest;
     private static final long UPDATE_INTERVAL = 5000; // Cada 5 segundos.
@@ -55,11 +55,12 @@ public class MainActivity extends FragmentActivity implements
         mRemoveUpdatesButton =  findViewById(R.id.mRemoveUpdatesButton);
         //mOnOff = (TextView) findViewById(R.id.textView_onOff);
 
-        // Check if the user revoked runtime permissions.
+        // Revisa si existen permisos y los solicita si está denegado
         if (!checkPermissions()) {
             requestPermissions();
         }
-        checkUserID();
+        //Genera o carga un userID (SharedPreferences)
+        Utils.checkUserID(this);
         //Acceso a la API que provee localización (Fused Location Provider)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -203,8 +204,10 @@ public class MainActivity extends FragmentActivity implements
     public void requestLocationUpdates(View view) {
         try {
             Log.i(TAG, "Starting location updates");
+            //--- Controla que el botón 'Activar' este deshabilitado
             Utils.setRequestingLocationUpdates(this, true);
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, getPendingIntent()); //clases: LocationRequest, PendingIntent
+            /** ---  Comienza a trabajar la API --- */
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest, getPendingIntent());
         } catch (SecurityException e) {
             Utils.setRequestingLocationUpdates(this, false);
             e.printStackTrace();
@@ -227,4 +230,7 @@ public class MainActivity extends FragmentActivity implements
             mRemoveUpdatesButton.setEnabled(false);
         }
     }
+
+
+
 }
