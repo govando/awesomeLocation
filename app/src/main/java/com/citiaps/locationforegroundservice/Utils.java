@@ -53,7 +53,7 @@ public class Utils {
             /** TODO if(online)
              *  TODO REVISAR EN http://hmkcode.com/android-send-json-data-to-server/
              */
-            new SendDeviceDetails.execute("http://localhost:8123/addLoc", stepLoc.toString());
+            //new SendDeviceDetails.execute("http://localhost:8123/addLoc", stepLoc.toString());
             // TODO if(offline) Almacenar en sharedpreference carepalo
         }
 
@@ -200,7 +200,8 @@ public class Utils {
                                        String accuracy, String altitude, String speed) {
         JSONObject stepJSON = new JSONObject();
         try {
-            // TODO stepJSON.put("index", "1");
+            // TODO
+            stepJSON.put("index", "1");
             stepJSON.put("userID", userID);
             stepJSON.put("lat", lat);
             stepJSON.put("lon", lon);
@@ -210,7 +211,6 @@ public class Utils {
             stepJSON.put("speed", speed);
 
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             Log.i(TAG, "---- Utils: No se pudo generar el JSON");
         }
