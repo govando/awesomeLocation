@@ -12,6 +12,12 @@
     <string name="unknown_location">Unknown location</string>
 
     <string name="batched_location_updates">Batched location updates</string>
+    <string name="mainText">Gracias por cooperar anónimamente con su geolozalización.</string>
+    <string name="mainText2">Puede seguir utlizando su teléfono con normalidad.</string>
+    <string name="textMain3">Si desea terminar la aplicación, debe presionar sobre el botón Terminar APP.</string>
+    <string name="textMain4">Si no cuenta con Internet, su geolozalización será enviadá en cuanto el teléfono cuente con conexión a Internet.</string>
+    <string name="logo_citiaps">Citiaps</string>
+    <string name="button_terminar">TERMINAR APP</string>
 
     <plurals name="num_locations_reported">
         <item quantity="zero">No location reported</item>

@@ -1,4 +1,4 @@
-package com.citiaps.locationforegroundservice;
+package com.citiaps.locationservice;
 
 
 import android.content.BroadcastReceiver;

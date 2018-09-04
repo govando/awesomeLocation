@@ -1,12 +1,10 @@
-package com.citiaps.locationforegroundservice;
+package com.citiaps.locationservice;
 
 import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -16,19 +14,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
+import com.citiaps.locationforegroundservice.BuildConfig;
+import com.citiaps.locationforegroundservice.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 
-/** Se solicita acceso a ACCESS_FINE_LOCATION
-   *  El usuario activa traza presionando el botón activar
-   *
-  */
-public class MainActivity extends FragmentActivity implements
-        SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends FragmentActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
@@ -51,41 +45,49 @@ public class MainActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mRequestUpdatesButton =  findViewById(R.id.mRequestUpdatesButton);
-        mRemoveUpdatesButton =  findViewById(R.id.mRemoveUpdatesButton);
+        //mRequestUpdatesButton =  findViewById(R.id.mRequestUpdatesButton);
+        //mRemoveUpdatesButton =  findViewById(R.id.mRemoveUpdatesButton);
         //mOnOff = (TextView) findViewById(R.id.textView_onOff);
 
         // Revisa si existen permisos y los solicita si está denegado
         if (!checkPermissions()) {
             requestPermissions();
+            Log.i("MainActvity","----> Permiso concedido");
         }
-        //Genera o carga un userID (SharedPreferences)
-        Utils.checkUserID(this);
+
+        //Genera o carga un userID único
+        Utils.setContext(this);
+        Utils.checkUserID();
         //Acceso a la API que provee localización (Fused Location Provider)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        Log.i("activityMain", "Chupalooooo");
+        Log.i("activityMain", " -----> Llamando createLocationRequest()");
         createLocationRequest();
+        try {
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest, getPendingIntent());
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .registerOnSharedPreferenceChangeListener(this);
+        //PreferenceManager.getDefaultSharedPreferences(this)
+        //        .registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        updateButtonsState(Utils.getRequestingLocationUpdates(this));
+        //updateButtonsState(Utils.getRequestingLocationUpdates(this));
         //mLocationUpdatesResultView.setText(Utils.getLocationUpdatesResult(this));
     }
 
     @Override
     protected void onStop() {
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .unregisterOnSharedPreferenceChangeListener(this);
+      //  PreferenceManager.getDefaultSharedPreferences(this)
+      //          .unregisterOnSharedPreferenceChangeListener(this);
         super.onStop();
     }
 
@@ -154,7 +156,7 @@ public class MainActivity extends FragmentActivity implements
                 Log.i(TAG, "User interaction was cancelled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission was granted.
-                requestLocationUpdates(null);
+                mFusedLocationClient.requestLocationUpdates(mLocationRequest, getPendingIntent());
             } else {
                 // Permission denied.
 
@@ -190,29 +192,28 @@ public class MainActivity extends FragmentActivity implements
         }
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        if (s.equals(Utils.KEY_LOCATION_UPDATES_RESULT)) {
-            // TODO aqui cambia el texto de Localización de la actividad
-            //mLocationUpdatesResultView.setText(Utils.getLocationUpdatesResult(this));
-        } else if (s.equals(Utils.KEY_LOCATION_UPDATES_REQUESTED)) {
-            updateButtonsState(Utils.getRequestingLocationUpdates(this));
-        }
-    }
+//    @Override
+//    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+//        if (s.equals(Utils.KEY_LOCATION_UPDATES_RESULT)) {
+//            //mLocationUpdatesResultView.setText(Utils.getLocationUpdatesResult(this));
+//        } else if (s.equals(Utils.KEY_LOCATION_UPDATES_REQUESTED)) {
+//            updateButtonsState(Utils.getRequestingLocationUpdates(this));
+//        }
+//    }
 
-    /** Maneja los botones de Requests Handles the Request Updates button and requests start of location updates. */
-    public void requestLocationUpdates(View view) {
-        try {
-            Log.i(TAG, "Starting location updates");
-            //--- Controla que el botón 'Activar' este deshabilitado
-            Utils.setRequestingLocationUpdates(this, true);
-            /** ---  Comienza a trabajar la API --- */
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, getPendingIntent());
-        } catch (SecurityException e) {
-            Utils.setRequestingLocationUpdates(this, false);
-            e.printStackTrace();
-        }
-    }
+//    /** Maneja los botones de Requests Handles the Request Updates button and requests start of location updates. */
+//    public void requestLocationUpdates(View view) {
+//        try {
+//            Log.i(TAG, "Starting location updates");
+//            //--- Controla que el botón 'Activar' este deshabilitado
+//            Utils.setRequestingLocationUpdates(this, true);
+//            /** ---  Comienza a trabajar la API --- */
+//            mFusedLocationClient.requestLocationUpdates(mLocationRequest, getPendingIntent());
+//        } catch (SecurityException e) {
+//            Utils.setRequestingLocationUpdates(this, false);
+//            e.printStackTrace();
+//        }
+//    }
 
       private PendingIntent getPendingIntent() {
           Intent intent = new Intent(this, LocationUpdatesBroadcastReceiver.class);
