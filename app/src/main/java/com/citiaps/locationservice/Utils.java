@@ -18,10 +18,11 @@ public class Utils {
      *  Las KEY son usadas para almacenar datos (persistentes) en SharedPreferences
      *  SharedPreferences permite almacenar datos usando <key,value>
      */
-    final static String KEY_LOCATION_UPDATES_REQUESTED = "location-updates-requested";
     final static String KEY_LOCATION_UPDATES_RESULT = "location-update-result";
     final static String KEY_CHECK_USERID = "user_id";
     final static String KEY_LOCATION_RESULT = "locations-waiting-for-connection";
+    final static String KEY_SEND_LOCAL_LOCS = "send_saved_locations_to_server";
+
 
     /** userID único por Dispositivo **/
     private static String userID = "null";
@@ -104,11 +105,25 @@ public class Utils {
 
     static public void saveLocation(String response){
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-            String locations = sp.getString(KEY_LOCATION_RESULT, "").concat(response);
+            String locations = sp.getString(KEY_LOCATION_RESULT, "").concat(response+",");
             sp.edit()
                .putString(KEY_LOCATION_RESULT, locations)
                .commit();
             Log.i(TAG,"----> Localizaciones guardadas: "+sp.getString(KEY_LOCATION_RESULT, locations));
+    }
+
+    static public void change_SendLocalLocs(){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean isOn = sp.getBoolean(KEY_SEND_LOCAL_LOCS, false);
+        isOn = !isOn;
+        sp.edit()
+                .putBoolean(KEY_SEND_LOCAL_LOCS, isOn)
+                .commit();
+    }
+
+    static public boolean isRunning_SendLocalLocs(){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean(KEY_SEND_LOCAL_LOCS, false);
     }
 
 

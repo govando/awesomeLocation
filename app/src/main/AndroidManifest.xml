@@ -21,12 +21,14 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="com.citiaps.locationservice.LocationUpdatesBroadcastReceiver"
+        <receiver
+            android:name="com.citiaps.locationservice.LocationUpdatesBroadcastReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.citiaps.locationforegroundservice.LocationUpdatesBroadcastReceiver.ACTION_PROCESS_UPDATES" />
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>

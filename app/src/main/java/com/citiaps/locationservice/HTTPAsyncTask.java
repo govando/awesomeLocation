@@ -2,6 +2,7 @@ package com.citiaps.locationservice;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -18,6 +19,7 @@ class HTTPAsyncTask extends AsyncTask<String, Void, String> {
     private JSONObject stepLoc;
     private static Context context;
 
+
     public HTTPAsyncTask(JSONObject stepLoc, Context context){
         this.stepLoc = stepLoc;
         this.context = context;
@@ -26,18 +28,19 @@ class HTTPAsyncTask extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... urls) {
         // params comes from the execute() call: params[0] is the url.
+        String response;
         try {
-            try {
-                Log.i("doInBackground","----> doInBackground! Deberia llamar a HttpPost");
-                return HttpPost(urls[0]);
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return "Error!";
-            }
-        } catch (IOException e) {
+            Log.i("doInBackground","----> doInBackground! Deberia llamar a HttpPost");
+            response = HttpPost(urls[0]);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return "Error!";
+        }
+        catch (IOException e) {
             Utils.saveLocation(stepLoc.toString());
             return "No se ha podido realizar la conexión. La localización se almacenará en disco";
         }
+        return response;
     }
 
     // onPostExecute displays the results of the AsyncTask.
@@ -45,6 +48,12 @@ class HTTPAsyncTask extends AsyncTask<String, Void, String> {
     protected void onPostExecute(String result) {
         if(result.equals("OK")) {
             Log.i("PostExecute", "----> Response: OK " + result);
+            //En este caso existe conexión a Internet. Genero un solo thread que envíe las Locs guardadas si es que existen
+            if(!Utils.isRunning_SendLocalLocs()){
+                Utils.change_SendLocalLocs();
+                SendSavedLocations sendSavedLocs = new SendSavedLocations(context);
+                sendSavedLocs.execute();
+            }
         } else{
             Log.i("PostExecute", "----> Response: MAL: Se almacena en celular "+result);
             //Si la localización no se envía, se almacena para enviarlas
