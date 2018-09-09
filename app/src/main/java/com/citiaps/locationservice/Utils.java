@@ -103,13 +103,22 @@ public class Utils {
         Log.i("TAG","--- MainActiviti: Se usará el id:"+userID);
     }
 
+    /** Almacena una localización de modo local **/
     static public void saveLocation(String response){
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-            String locations = sp.getString(KEY_LOCATION_RESULT, "").concat(response+",");
+            String locations = sp.getString(KEY_LOCATION_RESULT, "").concat(response+"#");
             sp.edit()
                .putString(KEY_LOCATION_RESULT, locations)
                .commit();
             Log.i(TAG,"----> Localizaciones guardadas: "+sp.getString(KEY_LOCATION_RESULT, locations));
+    }
+    /** Sobreescribe todas las localizaciones almacenadas**/
+    static public void editAllLocation(String locations){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit()
+                .putString(KEY_LOCATION_RESULT, locations)
+                .commit();
+        Log.i(TAG,"----> Bulk de localizaciones guardadas despues de BulkInsert: "+sp.getString(KEY_LOCATION_RESULT, locations));
     }
 
     static public void change_SendLocalLocs(){

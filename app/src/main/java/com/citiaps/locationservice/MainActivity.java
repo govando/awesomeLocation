@@ -3,8 +3,10 @@ package com.citiaps.locationservice;
 import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -48,7 +50,10 @@ public class MainActivity extends FragmentActivity {
         //mRequestUpdatesButton =  findViewById(R.id.mRequestUpdatesButton);
         //mRemoveUpdatesButton =  findViewById(R.id.mRemoveUpdatesButton);
         //mOnOff = (TextView) findViewById(R.id.textView_onOff);
-
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        sp.edit()
+                .putBoolean(Utils.KEY_SEND_LOCAL_LOCS, false)
+                .apply();
         // Revisa si existen permisos y los solicita si está denegado
         if (!checkPermissions()) {
             requestPermissions();
@@ -73,8 +78,6 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        //PreferenceManager.getDefaultSharedPreferences(this)
-        //        .registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override

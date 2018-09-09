@@ -18,7 +18,7 @@ import java.net.URL;
 class HTTPAsyncTask extends AsyncTask<String, Void, String> {
     private JSONObject stepLoc;
     private static Context context;
-
+    private String TAG="HTTPAsyncTask";
 
     public HTTPAsyncTask(JSONObject stepLoc, Context context){
         this.stepLoc = stepLoc;
@@ -48,16 +48,17 @@ class HTTPAsyncTask extends AsyncTask<String, Void, String> {
     protected void onPostExecute(String result) {
         if(result.equals("OK")) {
             Log.i("PostExecute", "----> Response: OK " + result);
+            Log.i("PostExecute", "----> Utils.isRunning_SendLocalLocs():" + Utils.isRunning_SendLocalLocs());
             //En este caso existe conexión a Internet. Genero un solo thread que envíe las Locs guardadas si es que existen
-            if(!Utils.isRunning_SendLocalLocs()){
+            if(Utils.isRunning_SendLocalLocs()==false){
+                Log.i(TAG,"----> No estaba corriendo. Se pondrá a ejecutar el hilo");
                 Utils.change_SendLocalLocs();
+                Log.i(TAG,"----> Ahora esta corrriendo!:");
                 SendSavedLocations sendSavedLocs = new SendSavedLocations(context);
-                sendSavedLocs.execute();
+                sendSavedLocs.execute("http://192.168.1.31:3000/addbulkloc");
             }
         } else{
             Log.i("PostExecute", "----> Response: MAL: Se almacena en celular "+result);
-            //Si la localización no se envía, se almacena para enviarlas
-            //Utils.saveLocation(result);
         }
     }
 
