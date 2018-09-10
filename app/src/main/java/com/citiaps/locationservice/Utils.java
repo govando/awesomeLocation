@@ -41,7 +41,7 @@ public class Utils {
                         location.getTime(), location.getAccuracy(),
                         location.getAltitude(), location.getSpeed());
                 HTTPAsyncTask asyncRequest = new HTTPAsyncTask(stepLoc,context);
-                asyncRequest.execute("http://192.168.1.31:3000/addloc");
+                asyncRequest.execute("http://192.168.1.84:3000/addloc");
             }
         } else{
                 // TODO avisar con un 'Toast' (mensaje flotante)  que no existe localización
