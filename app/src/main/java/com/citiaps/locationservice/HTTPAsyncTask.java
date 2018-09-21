@@ -55,7 +55,7 @@ class HTTPAsyncTask extends AsyncTask<String, Void, String> {
                 Utils.change_SendLocalLocs();
                 Log.i(TAG,"----> Ahora esta corrriendo!:");
                 SendSavedLocations sendSavedLocs = new SendSavedLocations(context);
-                sendSavedLocs.execute("http://192.168.1.84:3000/addbulkloc");
+                sendSavedLocs.execute("http://citiapsdevs.ddns.net:3000/addbulkloc");
             }
         } else{
             Log.i("PostExecute", "----> Response: MAL: Se almacena en celular "+result);
