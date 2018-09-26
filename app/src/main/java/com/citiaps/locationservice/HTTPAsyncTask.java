@@ -15,6 +15,8 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import okhttp3.internal.Util;
+
 class HTTPAsyncTask extends AsyncTask<String, Void, String> {
     private JSONObject stepLoc;
     private static Context context;
@@ -38,6 +40,11 @@ class HTTPAsyncTask extends AsyncTask<String, Void, String> {
         }
         catch (IOException e) {
             Utils.saveLocation(stepLoc.toString());
+            PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit()
+                    .putBoolean(Utils.KEY_EXIST_LOCAL_DATA, true)
+                    .apply();
+            Log.i(TAG, " Se almacena loc-- KEY_EXIST_LOCAL_DATA: true");
             return "No se ha podido realizar la conexión. La localización se almacenará en disco";
         }
         return response;
@@ -55,11 +62,12 @@ class HTTPAsyncTask extends AsyncTask<String, Void, String> {
                 Utils.change_SendLocalLocs();
                 Log.i(TAG,"----> Ahora esta corrriendo!:");
                 SendSavedLocations sendSavedLocs = new SendSavedLocations(context);
-                sendSavedLocs.execute("http://citiapsdevs.ddns.net:3000/addbulkloc");
+                sendSavedLocs.execute(Utils.url+":3000/addbulkloc");
             }
         } else{
             Log.i("PostExecute", "----> Response: MAL: Se almacena en celular "+result);
         }
+        Utils.checkSnackBar();
     }
 
     private String HttpPost(String myUrl) throws IOException, JSONException {

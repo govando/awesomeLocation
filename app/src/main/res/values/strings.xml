@@ -3,6 +3,7 @@
 
     <string name="permission_rationale">Por favor active el permiso de localización</string>
     <string name="permission_denied_explanation">Por favor active el permiso de localización.</string>
+    <string name="localizaciones_pendientes">Conéctese a Internet para que sus localizaciones sin conexión puedan ser enviadas al servidor.</string>
     <string name="settings">Settings</string>
     <string name="ok">OK</string>
 

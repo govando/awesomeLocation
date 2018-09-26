@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.citiaps.locationforegroundservice.BuildConfig;
 import com.citiaps.locationforegroundservice.R;
@@ -24,9 +25,12 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static Snackbar snack;
+
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     /** Parametros del Request para la API de localización **/
     private LocationRequest mLocationRequest;
@@ -47,9 +51,7 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //mRequestUpdatesButton =  findViewById(R.id.mRequestUpdatesButton);
-        //mRemoveUpdatesButton =  findViewById(R.id.mRemoveUpdatesButton);
-        //mOnOff = (TextView) findViewById(R.id.textView_onOff);
+
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         sp.edit()
                 .putBoolean(Utils.KEY_SEND_LOCAL_LOCS, false)
@@ -59,10 +61,11 @@ public class MainActivity extends FragmentActivity {
             requestPermissions();
             Log.i("MainActvity","----> Permiso concedido");
         }
-
         //Genera o carga un userID único
         Utils.setContext(this);
         Utils.checkUserID();
+        Log.i(TAG, " --- KEY_EXIST_LOCAL_DATA parte en: false");
+
         //Acceso a la API que provee localización (Fused Location Provider)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -75,9 +78,33 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
+
+
     @Override
     protected void onStart() {
         super.onStart();
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        sp.registerOnSharedPreferenceChangeListener(this);
+        boolean existElements = sp.getBoolean(Utils.KEY_EXIST_LOCAL_DATA, false);
+        if (existElements==true){
+            this.alertPendingLocsToSend();
+        } else{
+            this.dismissSnackBar();
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        Log.i(TAG, "---- onSharedPreferenceChanged : "+s);
+        if (s.equals(Utils.KEY_EXIST_LOCAL_DATA)) {
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+            boolean existElements = sp.getBoolean(Utils.KEY_EXIST_LOCAL_DATA, false);
+            if (existElements==true){
+                this.alertPendingLocsToSend();
+            } else{
+                this.dismissSnackBar();
+            }
+        }
     }
 
     @Override
@@ -195,15 +222,16 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-//    @Override
-//    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-//        if (s.equals(Utils.KEY_LOCATION_UPDATES_RESULT)) {
-//            //mLocationUpdatesResultView.setText(Utils.getLocationUpdatesResult(this));
-//        } else if (s.equals(Utils.KEY_LOCATION_UPDATES_REQUESTED)) {
-//            updateButtonsState(Utils.getRequestingLocationUpdates(this));
-//        }
-//    }
-
+/*
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        if (s.equals(Utils.KEY_LOCATION_UPDATES_RESULT)) {
+            //mLocationUpdatesResultView.setText(Utils.getLocationUpdatesResult(this));
+        } else if (s.equals(Utils.KEY_LOCATION_UPDATES_REQUESTED)) {
+            updateButtonsState(Utils.getRequestingLocationUpdates(this));
+        }
+    }
+*/
 //    /** Maneja los botones de Requests Handles the Request Updates button and requests start of location updates. */
 //    public void requestLocationUpdates(View view) {
 //        try {
@@ -224,16 +252,23 @@ public class MainActivity extends FragmentActivity {
           return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
       }
 
-    /** Mantiene un solo botón disponible */
-    private void updateButtonsState(boolean requestingLocationUpdates) {
-        if (requestingLocationUpdates) {
-            mRequestUpdatesButton.setEnabled(false);
-            mRemoveUpdatesButton.setEnabled(true);
-        } else {
-            mRequestUpdatesButton.setEnabled(true);
-            mRemoveUpdatesButton.setEnabled(false);
+
+
+    public void alertPendingLocsToSend(){
+
+        snack = Snackbar.make(
+                findViewById(R.id.activity_main),
+                R.string.localizaciones_pendientes,
+                Snackbar.LENGTH_INDEFINITE);
+        snack.show();
+    }
+
+    public void dismissSnackBar(){
+          if(snack!=null ){
+            snack.dismiss();
         }
     }
+
 
 
 

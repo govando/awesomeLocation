@@ -1,14 +1,24 @@
 package com.citiaps.locationservice;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
+
+import com.citiaps.locationforegroundservice.BuildConfig;
+import com.citiaps.locationforegroundservice.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -22,6 +32,8 @@ public class Utils {
     final static String KEY_CHECK_USERID = "user_id";
     final static String KEY_LOCATION_RESULT = "locations-waiting-for-connection";
     final static String KEY_SEND_LOCAL_LOCS = "send_saved_locations_to_server";
+    final static String KEY_EXIST_LOCAL_DATA = "exist_local_data";
+    public static final String url = "http://192.168.1.31" ;//"http://citiapsdevs.ddns.net";
 
 
     /** userID único por Dispositivo **/
@@ -30,6 +42,7 @@ public class Utils {
 //    final static String CHANNEL_ID = "channel_01"; //variable para notificaciones
     private static Random generator = new Random();
     private static Context context;
+
 
     static void sendLocations(List<Location> locations) {
         JSONObject stepLoc=null;
@@ -41,7 +54,7 @@ public class Utils {
                         location.getTime(), location.getAccuracy(),
                         location.getAltitude(), location.getSpeed());
                 HTTPAsyncTask asyncRequest = new HTTPAsyncTask(stepLoc,context);
-                asyncRequest.execute("http://citiapsdevs.ddns.net:3000/addloc");
+                asyncRequest.execute(url+":3000/addloc");
             }
         } else{
                 // TODO avisar con un 'Toast' (mensaje flotante)  que no existe localización
@@ -98,19 +111,33 @@ public class Utils {
                     .edit()
                     .putString(Utils.KEY_CHECK_USERID, userID)
                     .apply();
-            Log.i("TAG","--- MainActiviti: Se genero el id:"+userID);
+            Log.i("TAG","--- MainActivity: Se genero el id:"+userID);
         }
-        Log.i("TAG","--- MainActiviti: Se usará el id:"+userID);
+        Log.i("TAG","--- MainActivity: Se usará el id:"+userID);
     }
 
     /** Almacena una localización de modo local **/
     static public void saveLocation(String response){
-            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-            String locations = sp.getString(KEY_LOCATION_RESULT, "").concat(response+"#");
-            sp.edit()
-               .putString(KEY_LOCATION_RESULT, locations)
-               .commit();
-            Log.i(TAG,"----> Localizaciones guardadas: "+sp.getString(KEY_LOCATION_RESULT, locations));
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String locations = sp.getString(KEY_LOCATION_RESULT, "").concat(response+"#");
+
+        //////////////----------
+        //Las localizaciones guardadas no pueden superar los 2MB ~= 7000 localizaciones aprox
+        String[] parts = locations.split("#");
+        if(parts.length >=4) {
+            parts = Arrays.copyOfRange(parts, 1, 4);
+            StringBuilder builder = new StringBuilder();
+            for (String s : parts) {
+                builder.append(s + "#");
+            }
+            locations = builder.toString();
+            //Utils.editAllLocation(locations);
+        }
+        ///////////////-----------
+        sp.edit()
+           .putString(KEY_LOCATION_RESULT, locations)
+           .commit();
+        Log.i(TAG,"----> Localizaciones guardadas: "+sp.getString(KEY_LOCATION_RESULT, locations));
     }
     /** Sobreescribe todas las localizaciones almacenadas**/
     static public void editAllLocation(String locations){
@@ -134,6 +161,22 @@ public class Utils {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean(KEY_SEND_LOCAL_LOCS, false);
     }
+
+    static public void checkSnackBar() {
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String localLocations = sp.getString(Utils.KEY_LOCATION_RESULT, null);
+        if(localLocations ==null || localLocations =="") {
+            Log.i(TAG,"----> localLocations ES NULL: -"+localLocations+"-");
+            PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit()
+                    .putBoolean(Utils.KEY_EXIST_LOCAL_DATA, false)
+                    .apply();
+        }
+        Log.i(TAG,"----> localLocations: -"+localLocations+"-");
+
+    }
+
 
 
 ////////////////////////////// NO SE USAN
