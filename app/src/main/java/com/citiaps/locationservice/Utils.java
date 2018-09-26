@@ -33,7 +33,7 @@ public class Utils {
     final static String KEY_LOCATION_RESULT = "locations-waiting-for-connection";
     final static String KEY_SEND_LOCAL_LOCS = "send_saved_locations_to_server";
     final static String KEY_EXIST_LOCAL_DATA = "exist_local_data";
-    public static final String url = "http://192.168.1.31" ;//"http://citiapsdevs.ddns.net";
+    public static final String url = "http://frontend.citiaps.usach.cl:80"; // "http://192.168.1.31" ;//"http://citiapsdevs.ddns.net";
 
 
     /** userID único por Dispositivo **/
@@ -54,7 +54,7 @@ public class Utils {
                         location.getTime(), location.getAccuracy(),
                         location.getAltitude(), location.getSpeed());
                 HTTPAsyncTask asyncRequest = new HTTPAsyncTask(stepLoc,context);
-                asyncRequest.execute(url+":3000/addloc");
+                asyncRequest.execute(url+"/addloc/");
             }
         } else{
                 // TODO avisar con un 'Toast' (mensaje flotante)  que no existe localización
