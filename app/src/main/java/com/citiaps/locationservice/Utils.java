@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
@@ -81,6 +82,9 @@ public class Utils {
     static JSONObject generateJSONstep(String userID, Double lat, Double lon, Long timestamp,
                                        Float accuracy, Double altitude, float speed) {
         JSONObject stepJSON = new JSONObject();
+        int level = MainActivity.batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = MainActivity.batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        float batteryPct = level / (float)scale;
         try {
             stepJSON.put("userID", userID);
             stepJSON.put("lat", lat);
@@ -89,7 +93,7 @@ public class Utils {
             stepJSON.put("accuracy", accuracy);
             stepJSON.put("altitude", altitude);
             stepJSON.put("speed", speed);
-
+            stepJSON.put("batteryPct", batteryPct);
         } catch (JSONException e) {
             e.printStackTrace();
             Log.i(TAG, "---- Utils: No se pudo generar el JSON");
@@ -122,10 +126,10 @@ public class Utils {
         String locations = sp.getString(KEY_LOCATION_RESULT, "").concat(response+"#");
 
         //////////////----------
-        //Las localizaciones guardadas no pueden superar los 2MB ~= 7000 localizaciones aprox
+        //Las localizaciones guardadas no pueden superar los 1MB ~= 3000 localizaciones aprox
         String[] parts = locations.split("#");
-        if(parts.length >=4) {
-            parts = Arrays.copyOfRange(parts, 1, 4);
+        if(parts.length >=3000) {
+            parts = Arrays.copyOfRange(parts, 1, 3000);
             StringBuilder builder = new StringBuilder();
             for (String s : parts) {
                 builder.append(s + "#");

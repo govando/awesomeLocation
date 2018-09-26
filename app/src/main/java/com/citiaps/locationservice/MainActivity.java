@@ -3,6 +3,7 @@ package com.citiaps.locationservice;
 import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -45,6 +46,7 @@ public class MainActivity extends FragmentActivity implements
     private Button mRequestUpdatesButton;
     private Button mRemoveUpdatesButton;
     //private TextView mOnOff;
+    public static Intent batteryStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +78,9 @@ public class MainActivity extends FragmentActivity implements
         } catch (SecurityException e) {
             e.printStackTrace();
         }
+
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        batteryStatus = this.registerReceiver(null, ifilter);
     }
 
 

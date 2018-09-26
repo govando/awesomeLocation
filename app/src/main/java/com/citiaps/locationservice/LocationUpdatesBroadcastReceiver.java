@@ -30,14 +30,6 @@ public class LocationUpdatesBroadcastReceiver extends BroadcastReceiver {
                 if (result != null) {
                     List<Location> locations = result.getLocations();
                     Utils.sendLocations(locations);
-                    /** Almacena las localizaciones en SharedPreferences, luego las lee
-                     * a través de la key ACTION_PROCESS_UPDATES
-                     *
-                     Utils.setLocationUpdatesResult(context, locations);
-                     /**  Puedo dejar una Notificación sobre la ejecución de la aplicación -> última ubicación
-                     Utils.sendNotification(context, Utils.getLocationResultTitle(context, locations));
-                     Log.i(TAG, Utils.getLocationUpdatesResult(context));
-                     /** **/
                 }
             }
         }
